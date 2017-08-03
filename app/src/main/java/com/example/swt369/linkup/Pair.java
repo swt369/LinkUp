@@ -1,9 +1,11 @@
 package com.example.swt369.linkup;
 
+import java.io.Serializable;
+
 /**
  * Created by swt369 on 2017/8/2.
  */
-class Pair {
+class Pair implements Serializable{
     private int row;
     private int column;
 

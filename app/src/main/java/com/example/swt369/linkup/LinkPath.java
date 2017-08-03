@@ -3,6 +3,7 @@ package com.example.swt369.linkup;
 import android.support.annotation.Nullable;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by swt369 on 2017/8/2.
@@ -62,11 +63,18 @@ final class LinkPath {
             if(curX < 0 || curX >= rowCount || curY < 0 || curY >= columnCount){
                 continue;
             }
-            if(curX == endX && curY == endY){
+            if(!finded && curX == endX && curY == endY){
                 curPath.addLast(new Pair(endX,endY));
                 resPath = new LinkedList<>(curPath);
                 finded = true;
                 return;
+            }
+        }
+        for(int i = 0 ; i < OFFSET_X.length ; i++){
+            int curX = x + OFFSET_X[i];
+            int curY = y + OFFSET_Y[i];
+            if(curX < 0 || curX >= rowCount || curY < 0 || curY >= columnCount){
+                continue;
             }
             if(map[curX][curY] == MapGenerator.NOT_EXIST){
                 curDirection = i;
@@ -94,7 +102,7 @@ final class LinkPath {
                     continue;
                 }
             }
-            if(curX == endX && curY == endY){
+            if(!finded && curX == endX && curY == endY){
                 curPath.addLast(new Pair(endX,endY));
                 resPath = new LinkedList<>(curPath);
                 finded = true;

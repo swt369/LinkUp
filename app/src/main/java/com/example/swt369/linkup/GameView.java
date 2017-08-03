@@ -3,10 +3,14 @@ package com.example.swt369.linkup;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.LinkedList;
 
 /**
  * Created by swt369 on 2017/8/2.
@@ -27,9 +31,16 @@ final class GameView extends View {
     private Bitmap[] bitmaps = null;
     private Rect[][] fields = null;
 
+    private Pair mSelected = null;
+    private Paint paintForSelected;
+
     public GameView(Context context) {
         super(context);
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        paintForSelected = new Paint();
+        paintForSelected.setStrokeWidth(5);
+        paintForSelected.setColor(Color.CYAN);
+        paintForSelected.setStyle(Paint.Style.STROKE);
     }
 
     void initializeSize(){
@@ -39,7 +50,7 @@ final class GameView extends View {
         map = MapGenerator.getMap();
         calcRowCountAndColumnCount();
         int length_x = (int)(mWidth * (1 - Settings.BRICKS_LEFT_RATIO - Settings.BRICKS_RIGHT_RATIO) / columnCount);
-        int length_y = (int)(mHeight / rowCount);
+        int length_y = mHeight / rowCount;
         brickLength = length_x < length_y ? length_x : length_y;
         brickLeft = (mWidth - brickLength * columnCount) / 2;
         brickTop = 0;
@@ -72,6 +83,35 @@ final class GameView extends View {
         }
     }
 
+    LinkedList<Pair> modifyPath(LinkedList<Pair> path){
+        LinkedList<Pair> pathInPixel = new LinkedList<>();
+        for(Pair pair : path){
+            Rect curRect = fields[pair.getRow()][pair.getColumn()];
+            pathInPixel.addLast(new Pair(curRect.centerX(),curRect.centerY()));
+        }
+        return pathInPixel;
+    }
+
+    void setSelected(Pair Selected){
+        this.mSelected = Selected;
+        invalidate(fields[mSelected.getRow()][mSelected.getColumn()]);
+    }
+
+    void removeSelected(){
+        if(mSelected != null){
+            int row = mSelected.getRow();
+            int column = mSelected.getColumn();
+            mSelected = null;
+            invalidate(fields[row][column]);
+        }
+    }
+
+    void resetMap(){
+        this.map = MapGenerator.getMap();
+        removeSelected();
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         if(mWidth == 0 || mHeight == 0 || bitmaps == null || fields == null){
@@ -85,6 +125,7 @@ final class GameView extends View {
             for(int j = 0 ; j < columnCount ; j++){
                 drawSingleBrick(canvas,i,j);
             }
+        drawSelected(canvas);
     }
 
     private void drawSingleBrick(Canvas canvas,int row,int column){
@@ -98,6 +139,12 @@ final class GameView extends View {
                 new Rect(0,0,bitmap.getWidth(),bitmap.getHeight()),
                 fields[row][column],
                 null);
+    }
+
+    private void drawSelected(Canvas canvas){
+        if(mSelected != null){
+            canvas.drawRect(fields[mSelected.getRow()][mSelected.getColumn()],paintForSelected);
+        }
     }
 
     private void calcRowCountAndColumnCount(){
